@@ -16,7 +16,7 @@ import java.util.StringTokenizer;
  */
 public class AprioriAssociationRuleGenerator {
 
-    public static final String SMALL_DATASET = "/data/smallDataset1.txt";
+    public static final String SMALL_DATASET = "/data/smallDataset.txt";
     public static final String LARGE_DATASET = "/data/supermarket.arff";
 
     /**
