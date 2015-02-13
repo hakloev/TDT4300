@@ -1,0 +1,15 @@
+#a,c,d
+#b,c,e
+#a,b,c,e
+#b,e
+
+@attribute 'a'
+@attribute 'b'
+@attribute 'c'
+@attribute 'd'
+@attribute 'e'
+
+t,?,t,t,?
+?,t,t,?,t
+t,t,t,?,t
+?,t,?,?,t

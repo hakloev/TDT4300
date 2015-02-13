@@ -1,8 +1,6 @@
 package no.ntnu.idi.tdt4300.arg.apriori;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class provides (or should provide) a skeletal implementation for the specific Apriori algorithms.
@@ -19,6 +17,11 @@ public abstract class AbstractAprioriAlgorithm<V> {
 
     protected double minSupport;
     protected double minConfidence;
+
+    /**
+     * Will use this as a temporary store for support values for given item sets
+     */
+    protected Map<ItemSet<V>, Double> supportValuesForItemsSets = new HashMap<ItemSet<V>, Double>();
 
     /**
      * Here we store the frequent itemset.
@@ -43,6 +46,58 @@ public abstract class AbstractAprioriAlgorithm<V> {
 
         frequentItemSets = new HashMap<Integer, List<ItemSet<V>>>();
         rules = new LinkedList<AssociationRule<V>>();
+    }
+
+    /**
+     * Removes the candidate item sets that has support less than minsup.
+     *
+     * @param candidateItemSets item sets to be processed
+     * @return list containing all item set candidates valid (greater or equal to minsup)
+     */
+    protected List<ItemSet<V>> pruneItemSets(List<ItemSet<V>> candidateItemSets) {
+        List<ItemSet<V>> validCandidates = new LinkedList<ItemSet<V>>();
+        for (ItemSet<V> itemSet : candidateItemSets) {
+            if (supportValuesForItemsSets.get(itemSet) >= minSupport) validCandidates.add(itemSet);
+        }
+        return validCandidates;
+    }
+
+
+    /**
+     * Generates the itemsets for k = 1 and adds the support number to the temporary storage.
+     *
+     * @return list containing all level 1 item sets
+     */
+    protected List<ItemSet<V>> getFirstLevelItemSets() {
+        Set<ItemSet<V>> levelItemSets = new HashSet<ItemSet<V>>();
+        for (ItemSet<V> transaction : transactions) {
+            for (V item : transaction.getItems()) {
+                ItemSet<V> itemSet = new ItemSet<V>();
+                itemSet.addItem(item);
+                levelItemSets.add(itemSet);
+                calculateOccurrencesOfItemSetInTransactions(itemSet);
+            }
+        }
+        return new LinkedList<ItemSet<V>>(levelItemSets);
+    }
+
+    /**
+     * Calculates how many time an item set occurs in the transaction list and saves it to the temporary storage.
+     *
+     * @param itemSet item set to be processed
+     * @return double telling how many times and item set occured
+     */
+    protected double calculateOccurrencesOfItemSetInTransactions(ItemSet<V> itemSet) {
+//        System.out.println("Calculating occurrences of " + itemset);
+        Double support = supportValuesForItemsSets.get(itemSet);
+        if (support != null) return support;
+
+        int itemSetOccurrences = 0;
+        for (ItemSet<V> transaction : transactions) {
+            if (transaction.intersection(itemSet).size() == itemSet.size()) itemSetOccurrences++;
+        }
+        supportValuesForItemsSets.put(itemSet, ((double) itemSetOccurrences) / transactions.size());
+        return itemSetOccurrences;
     }
 
     /**
